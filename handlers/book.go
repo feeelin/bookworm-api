@@ -19,6 +19,15 @@ func NewBookHandler(repo *repository.BookRepository, validate *validator.Validat
 	return &BookHandler{Repo: repo, Validate: validate}
 }
 
+// @Summary Create book
+// @Tags Book
+// @Accept json
+// @Produce json
+// @Param book body models.Book true "Book data"
+// @Success 201 {object} models.Book
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /books [post]
 func (h *BookHandler) CreateBook(c *gin.Context) {
 	var book models.Book
 	if err := c.ShouldBindJSON(&book); err != nil {
@@ -39,6 +48,12 @@ func (h *BookHandler) CreateBook(c *gin.Context) {
 	c.JSON(http.StatusCreated, book)
 }
 
+// @Summary Get all books
+// @Tags Book
+// @Produce json
+// @Success 200 {array} models.Book
+// @Failure 500 {object} map[string]string
+// @Router /books [get]
 func (h *BookHandler) GetBooks(c *gin.Context) {
 	result, err := h.Repo.FindAll()
 	if err != nil {
@@ -49,6 +64,15 @@ func (h *BookHandler) GetBooks(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// @Summary Get book by id
+// @Tags Book
+// @Produce json
+// @Param id path int true "Book id"
+// @Success 200 {object} models.Book
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /books/{id} [get]
 func (h *BookHandler) GetBook(c *gin.Context) {
 	id, ok := getIDFromURL(c)
 	if !ok {
@@ -64,6 +88,17 @@ func (h *BookHandler) GetBook(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// @Summary Update book by id
+// @Tags Book
+// @Accept json
+// @Produce json
+// @Param id path int true "Book id"
+// @Param book body models.Book true "Book data"
+// @Success 200 {object} models.Book
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /books/{id} [put]
 func (h *BookHandler) UpdateBook(c *gin.Context) {
 	id, ok := getIDFromURL(c)
 	if !ok {
@@ -97,6 +132,14 @@ func (h *BookHandler) UpdateBook(c *gin.Context) {
 	c.JSON(http.StatusOK, book)
 }
 
+// @Summary Delete book by id
+// @Tags Book
+// @Param id path int true "Book id"
+// @Success 204 {object} nil
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /books/{id} [delete]
 func (h *BookHandler) DeleteBook(c *gin.Context) {
 	id, ok := getIDFromURL(c)
 	if !ok {
