@@ -1,0 +1,5 @@
+version = 1
+
+[analyzers.golang]
+rules.override = ["ALL=on"]
+source-tree-root.use-project-directory = true
