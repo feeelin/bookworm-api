@@ -1,0 +1,125 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+default:
+  image: golang:1.26.4
+
+stages:
+  - commit-check
+  - static-check
+  - test
+
+commit-lint:
+  stage: commit-check
+  image: python:3.12-slim
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends git
+    - pip3 install commitizen
+    - git fetch origin $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+  script:
+    - cz check --rev-range origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME..HEAD
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+golangci-lint:
+  stage: static-check
+  image: golangci/golangci-lint:v2.14.0
+  script:
+    - golangci-lint run
+  artifacts:
+    when: always
+    reports:
+      codequality: gl-code-quality-report.json
+    expire_in: 1 week
+
+pvs-studio-analyze:
+  stage: static-check
+  image:
+    name: golang:1.26.4
+    docker:
+      platform: linux/amd64
+  variables:
+    PVS_STUDIO_NAME: "name"
+    PVS_STUDIO_KEY: "key"
+  before_script:
+      - wget -qO- https://wcdn.pvs-studio.com/etc/pubkey.txt | gpg --dearmor -o /etc/apt/trusted.gpg.d/viva64.gpg
+      - wget -O /etc/apt/sources.list.d/viva64.list https://wcdn.pvs-studio.com/etc/viva64.list
+      - apt-get update
+      - apt-get install -y pvs-golang
+      - pvs-studio-analyzer credentials $PVS_STUDIO_NAME $PVS_STUDIO_KEY
+  script:
+    pvs-golang analyze . --disable-license-expiration-check --indicate-warnings
+  after_script:
+    plog-converter -t gitlab -a ALL -o ./ -n pvs-studio-report PVS-Studio.json
+  artifacts:
+    when: always
+    reports:
+      codequality: pvs-studio-report.gitlab.json
+    expire_in: 1 week
+
+trivy-check:
+  stage: static-check
+  image:
+    name: aquasec/trivy:0.75.0
+    entrypoint: [""]
+  variables:
+    TRIVY_CACHE_DIR: .trivycache
+    TRIVY_NO_PROGRESS: "true"
+  cache:
+    key: trivy-db
+    paths:
+      - .trivycache
+  script:
+    - trivy fs --scanners vuln --skip-dirs .trivycache --format json --output trivy-report.json --exit-code 0 .
+    - trivy convert --format template --template "@/contrib/gitlab-codequality.tpl" --output gl-sca-report.json trivy-report.json
+    - trivy fs --scanners vuln --skip-dirs .trivycache --severity HIGH,CRITICAL --exit-code 1 .
+  artifacts:
+    when: always
+    paths:
+      - trivy-report.json
+      - gl-sca-report.json
+    reports:
+      codequality: gl-sca-report.json
+    expire_in: 1 week
+
+gitleaks-check:
+  stage: static-check
+  image:
+    name: zricethezav/gitleaks:v8.30.1
+    entrypoint: [""]
+  variables:
+    GIT_DEPTH: 0
+  script:
+    - gitleaks git --redact -v --report-format junit --report-path gitleaks-report.xml
+  artifacts:
+    when: always
+    paths:
+      - gitleaks-report.xmls
+    reports:
+      junit: gitleaks-report.xml
+    expire_in: 1 week
+
+test-unit:
+  stage: test
+  before_script:
+    - go install gotest.tools/gotestsum@v1.13.0
+  script:
+    - gotestsum --junitfile report-unit.xml --format testname -- -race -coverprofile=coverage.out ./...
+    - go tool cover -func=coverage.out
+  artifacts:
+    when: always
+    reports:
+      junit: report-unit.xml
+
+test-integration:
+  stage: test
+  before_script:
+    - go install gotest.tools/gotestsum@v1.13.0
+  script:
+    - gotestsum --junitfile report-integration.xml --format testname -- -tags=integration ./integration
+  artifacts:
+    when: always
+    reports:
+      junit: report-integration.xml
