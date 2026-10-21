@@ -1,3 +1,4 @@
+// Command bookworm-api runs the bookworm HTTP API server.
 package main
 
 import (

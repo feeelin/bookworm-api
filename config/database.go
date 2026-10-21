@@ -1,3 +1,4 @@
+// Package config sets up the database connection and schema.
 package config
 
 import (

@@ -66,7 +66,9 @@ func NewValidator(t *testing.T) *validator.Validate {
 	t.Helper()
 
 	validate := validator.New()
-	validators.RegisterStatusValidator(validate)
+	if err := validators.RegisterStatusValidator(validate); err != nil {
+		t.Fatalf("register status validator: %v", err)
+	}
 
 	return validate
 }

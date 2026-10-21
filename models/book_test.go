@@ -82,7 +82,9 @@ func TestBookUnmarshalNullRating(t *testing.T) {
 
 func TestBookValidation(t *testing.T) {
 	validate := validator.New()
-	validators.RegisterStatusValidator(validate)
+	if err := validators.RegisterStatusValidator(validate); err != nil {
+		t.Fatalf("register status validator: %v", err)
+	}
 
 	rating := func(v int8) *int8 { return &v }
 
@@ -188,7 +190,9 @@ func TestBookValidation(t *testing.T) {
 // is still "present", so the min=1 rule must fire rather than be skipped.
 func TestBookZeroRatingIsNotTreatedAsEmpty(t *testing.T) {
 	validate := validator.New()
-	validators.RegisterStatusValidator(validate)
+	if err := validators.RegisterStatusValidator(validate); err != nil {
+		t.Fatalf("register status validator: %v", err)
+	}
 
 	zero := int8(0)
 	book := models.Book{Name: "n", Author: "a", Description: "d", Rating: &zero, Status: models.Reading}

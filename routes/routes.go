@@ -1,3 +1,4 @@
+// Package routes wires HTTP routes to their handlers.
 package routes
 
 import (

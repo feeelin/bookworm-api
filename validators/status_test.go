@@ -18,7 +18,9 @@ func newValidator(t *testing.T) *validator.Validate {
 	t.Helper()
 
 	v := validator.New()
-	validators.RegisterStatusValidator(v)
+	if err := validators.RegisterStatusValidator(v); err != nil {
+		t.Fatalf("register status validator: %v", err)
+	}
 
 	return v
 }
@@ -83,8 +85,12 @@ func TestRegisterStatusValidatorIsRequiredForTheTag(t *testing.T) {
 
 func TestRegisterStatusValidatorIsIdempotent(t *testing.T) {
 	v := validator.New()
-	validators.RegisterStatusValidator(v)
-	validators.RegisterStatusValidator(v)
+	if err := validators.RegisterStatusValidator(v); err != nil {
+		t.Fatalf("register status validator: %v", err)
+	}
+	if err := validators.RegisterStatusValidator(v); err != nil {
+		t.Fatalf("register status validator: %v", err)
+	}
 
 	if err := v.Struct(statusHolder{Status: models.Reading}); err != nil {
 		t.Fatalf("expected valid status after double registration, got: %v", err)
