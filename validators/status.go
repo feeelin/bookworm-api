@@ -1,3 +1,4 @@
+// Package validators holds custom request validation rules.
 package validators
 
 import (
@@ -16,6 +17,7 @@ func validateStatus(fl validator.FieldLevel) bool {
 	return slices.Contains(validStatus, status)
 }
 
-func RegisterStatusValidator(v *validator.Validate) {
-	v.RegisterValidation("validstatus", validateStatus)
+// RegisterStatusValidator registers the "validstatus" rule on v.
+func RegisterStatusValidator(v *validator.Validate) error {
+	return v.RegisterValidation("validstatus", validateStatus)
 }

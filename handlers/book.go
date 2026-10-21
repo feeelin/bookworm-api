@@ -10,15 +10,19 @@ import (
 	"github.com/feeelin/bookworm-api/repository"
 )
 
+// BookHandler serves the book endpoints.
 type BookHandler struct {
 	Repo     *repository.BookRepository
 	Validate *validator.Validate
 }
 
+// NewBookHandler returns a BookHandler using repo and validate.
 func NewBookHandler(repo *repository.BookRepository, validate *validator.Validate) *BookHandler {
 	return &BookHandler{Repo: repo, Validate: validate}
 }
 
+// CreateBook creates a book.
+//
 // @Summary Create book
 // @Tags Book
 // @Accept json
@@ -48,6 +52,8 @@ func (h *BookHandler) CreateBook(c *gin.Context) {
 	c.JSON(http.StatusCreated, book)
 }
 
+// GetBooks lists all books.
+//
 // @Summary Get all books
 // @Tags Book
 // @Produce json
@@ -64,6 +70,8 @@ func (h *BookHandler) GetBooks(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// GetBook returns a book by id.
+//
 // @Summary Get book by id
 // @Tags Book
 // @Produce json
@@ -88,6 +96,8 @@ func (h *BookHandler) GetBook(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// UpdateBook updates a book by id.
+//
 // @Summary Update book by id
 // @Tags Book
 // @Accept json
@@ -132,6 +142,8 @@ func (h *BookHandler) UpdateBook(c *gin.Context) {
 	c.JSON(http.StatusOK, book)
 }
 
+// DeleteBook deletes a book by id.
+//
 // @Summary Delete book by id
 // @Tags Book
 // @Param id path int true "Book id"

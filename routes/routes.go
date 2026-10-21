@@ -11,6 +11,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// RegisterRoutes mounts all API routes on r.
 func RegisterRoutes(r *gin.Engine, db *gorm.DB, validate *validator.Validate) {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	registerBookRoutes(r, db, validate)

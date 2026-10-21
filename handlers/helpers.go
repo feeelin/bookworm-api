@@ -16,7 +16,7 @@ func getIDFromURL(c *gin.Context) (uint, bool) {
 		return 0, false
 	}
 
-	var outputID uint = uint(id)
+	outputID := uint(id)
 	return outputID, true
 }
 

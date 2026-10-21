@@ -28,9 +28,9 @@ var (
 
 // printVersion writes the build information the binary was stamped with.
 func printVersion(w io.Writer) {
-	fmt.Fprintf(w, "version: %s\n", version)
-	fmt.Fprintf(w, "commit: %s\n", commit)
-	fmt.Fprintf(w, "built: %s\n", buildTime)
+	_, _ = fmt.Fprintf(w, "version: %s\n", version)
+	_, _ = fmt.Fprintf(w, "commit: %s\n", commit)
+	_, _ = fmt.Fprintf(w, "built: %s\n", buildTime)
 }
 
 // getVersion reports the build information of the running binary.
@@ -55,11 +55,14 @@ func main() {
 		return
 	}
 
-	godotenv.Load()
+	// A missing .env file is fine: configuration may come from the environment.
+	_ = godotenv.Load()
 	docs.SwaggerInfo.Host = os.Getenv("API_HOST")
 
 	validate := validator.New()
-	validators.RegisterStatusValidator(validate)
+	if err := validators.RegisterStatusValidator(validate); err != nil {
+		log.Fatalf("failed to register validators: %v", err)
+	}
 
 	db := config.ConnectDatabase()
 	config.RunMigrations(db)

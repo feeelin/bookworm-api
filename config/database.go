@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// ConnectDatabase opens the SQLite database, exiting on failure.
 func ConnectDatabase() *gorm.DB {
 	databaseDriver := sqlite.Open("database.db")
 
@@ -20,6 +21,7 @@ func ConnectDatabase() *gorm.DB {
 	return db
 }
 
+// RunMigrations migrates the database schema, exiting on failure.
 func RunMigrations(db *gorm.DB) {
 	if err := db.AutoMigrate(&models.Book{}); err != nil {
 		log.Fatal("Migration failed.")

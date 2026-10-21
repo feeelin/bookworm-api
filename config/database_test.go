@@ -28,7 +28,7 @@ func TestConnectDatabase(t *testing.T) {
 	if err != nil {
 		t.Fatalf("get sql.DB: %v", err)
 	}
-	t.Cleanup(func() { sqlDB.Close() })
+	t.Cleanup(func() { _ = sqlDB.Close() })
 
 	if err := sqlDB.Ping(); err != nil {
 		t.Fatalf("ping: %v", err)
@@ -108,7 +108,7 @@ func newMemoryDB(t *testing.T) *gorm.DB {
 
 	t.Cleanup(func() {
 		if sqlDB, err := db.DB(); err == nil {
-			sqlDB.Close()
+			_ = sqlDB.Close()
 		}
 	})
 

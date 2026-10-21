@@ -1,17 +1,21 @@
+// Package models defines the domain types persisted by the API.
 package models
 
 import (
 	"gorm.io/gorm"
 )
 
+// Status is the reading state of a book.
 type Status string
 
+// Allowed values of Status.
 const (
 	WantToRead Status = "want_to_read"
 	Reading    Status = "reading"
 	Finished   Status = "finished"
 )
 
+// Book is a book tracked by the API.
 type Book struct {
 	gorm.Model
 
