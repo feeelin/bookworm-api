@@ -145,3 +145,15 @@ build-image:
     - docker build --build-arg VERSION=$VERSION --build-arg COMMIT=$CI_COMMIT_SHORT_SHA --build-arg BUILD_TIME=$BUILD_TIME -t $IMAGE .
     - docker run --rm $IMAGE --version
     - docker push $IMAGE
+
+build-image-check:
+  stage: build
+  image: docker:27-cli
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - docker build -t go-api:mr-check .
