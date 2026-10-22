@@ -43,6 +43,11 @@ func getVersion(c *gin.Context) {
 	})
 }
 
+// getHealth reports that the process is up and serving requests.
+func getHealth(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+}
+
 // @title bookworm-api
 // @version 1.0
 // @description Little API on Go with Gin
@@ -70,6 +75,7 @@ func main() {
 
 	r := gin.Default()
 
+	r.GET("/health", getHealth)
 	r.GET("/version", getVersion)
 	routes.RegisterRoutes(r, db, validate)
 
