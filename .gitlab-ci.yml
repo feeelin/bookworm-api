@@ -17,6 +17,16 @@ stages:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
+.go-cache:
+  variables:
+    GOPATH: $CI_PROJECT_DIR/.go
+  cache:
+    key:
+      files:
+        - go.sum
+    paths:
+      - .go/pkg/mod/
+
 commit-lint:
   stage: commit-check
   image: python:3.12-slim
@@ -111,7 +121,7 @@ gitleaks-check:
     expire_in: 1 week
 
 test-unit:
-  extends: .only-in-mr
+  extends: [.go-cache, .only-in-mr]
   stage: test
   before_script:
     - go install gotest.tools/gotestsum@v1.13.0
@@ -124,7 +134,7 @@ test-unit:
       junit: report-unit.xml
 
 test-integration:
-  extends: .only-in-mr
+  extends: [.go-cache, .only-in-mr]
   stage: test
   before_script:
     - go install gotest.tools/gotestsum@v1.13.0
