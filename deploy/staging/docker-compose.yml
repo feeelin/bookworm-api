@@ -5,3 +5,8 @@ services:
     restart: unless-stopped
     ports:
       - '8081:8080'
+    volumes:
+      - staging_data:/data
+
+volumes:
+  staging_data:
