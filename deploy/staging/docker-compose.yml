@@ -1,0 +1,7 @@
+services:
+  app:
+    image: ${IMAGE}
+    container_name: go-api-staging
+    restart: unless-stopped
+    ports:
+      - '8081:8080'
