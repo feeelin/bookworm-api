@@ -15,6 +15,26 @@ func init() {
 	gin.SetMode(gin.TestMode)
 }
 
+func TestGetHealthReportsOK(t *testing.T) {
+	router := gin.New()
+	router.GET("/health", getHealth)
+
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/health", nil))
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d (body: %s)", recorder.Code, http.StatusOK, recorder.Body)
+	}
+
+	var body map[string]string
+	if err := json.Unmarshal(recorder.Body.Bytes(), &body); err != nil {
+		t.Fatalf("decode the response: %v", err)
+	}
+	if body["status"] != "ok" || len(body) != 1 {
+		t.Errorf("body = %s, want {\"status\":\"ok\"}", recorder.Body)
+	}
+}
+
 func TestGetVersionReturnsTheBuildInformation(t *testing.T) {
 	router := gin.New()
 	router.GET("/version", getVersion)
