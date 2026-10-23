@@ -12,7 +12,7 @@ stages:
   - static-check
   - test
   - build
-  - deploy
+  - staging
   - production
 
 .only-in-mr:
@@ -173,7 +173,7 @@ build-image-check:
     - docker build -t go-api:mr-check .
 
 deploy-staging:
-  stage: deploy
+  stage: staging
   image: alpine:3.20
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
