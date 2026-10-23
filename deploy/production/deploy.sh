@@ -34,22 +34,18 @@ docker compose pull "app-$NEW"
 log "Starting app-$NEW"
 docker compose up -d --no-deps --force-recreate "app-$NEW"
 
-# 4. Wait until the health check turns green
-log "Waiting for app-$NEW to become healthy (up to 60 seconds)"
-CID=$(docker compose ps -q "app-$NEW")
-STATUS=starting
+# 4. Wait until the new color answers on /health
+log "Waiting for app-$NEW to answer on /health (up to 60 seconds)"
 i=0
-while [ "$i" -lt 30 ]; do
-  STATUS=$(docker inspect -f '{{.State.Health.Status}}' "$CID")
-  [ "$STATUS" = "healthy" ] && break
+until docker compose exec -T nginx wget -qO- "http://app-$NEW:8080/health" >/dev/null 2>&1; do
   i=$((i + 1))
+  if [ "$i" -ge 30 ]; then
+    log "ERROR: app-$NEW did not answer on /health, traffic was NOT switched"
+    docker compose logs --tail 50 "app-$NEW"
+    exit 1
+  fi
   sleep 2
 done
-if [ "$STATUS" != "healthy" ]; then
-  log "ERROR: app-$NEW did not become healthy (status: $STATUS), traffic was NOT switched"
-  docker compose logs --tail 50 "app-$NEW"
-  exit 1
-fi
 log "app-$NEW is healthy"
 
 # 5. Check the version on the new color while users are still on the old one
